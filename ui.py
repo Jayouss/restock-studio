@@ -13,11 +13,11 @@ def h(value):
 
 
 def layout(title, main, *, body_class="", script=""):
-    script_tag = f'<script src="/static/{script}" defer></script>' if script else ""
+    script_tag = f'<script src="/static/{script}?v=5" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
-<link rel="stylesheet" href="/static/style.css">{script_tag}</head>
+<link rel="stylesheet" href="/static/style.css?v=5">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
 
@@ -326,57 +326,7 @@ def admin_page(stats, retrying, rows, status):
       </div>
     </div>
   </main>
-</div>
-<script>
-const input = document.getElementById('filter-input');
-function applyFilter() {{
-  if (!input) return;
-  const q = input.value.trim().toLowerCase();
-  const rows = document.querySelectorAll('#table-body .table-row');
-  rows.forEach(row => {{
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.indexOf(q) !== -1 ? '' : 'none';
-  }});
-}}
-if (input) {{
-  input.addEventListener('input', applyFilter);
-}}
-
-// Live background auto-refresh
-async function autoSync() {{
-  if (input && document.activeElement === input && input.value.trim().length > 0) {{
-    return;
-  }}
-  try {{
-    const res = await fetch(window.location.href, {{ headers: {{ 'Cache-Control': 'no-cache' }} }});
-    if (!res.ok) return;
-    const text = await res.text();
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    
-    const newMetrics = doc.querySelector('.metrics-grid');
-    const oldMetrics = document.querySelector('.metrics-grid');
-    if (newMetrics && oldMetrics) {{
-      oldMetrics.innerHTML = newMetrics.innerHTML;
-    }}
-    
-    const newTbody = doc.getElementById('table-body');
-    const oldTbody = document.getElementById('table-body');
-    if (newTbody && oldTbody) {{
-      oldTbody.innerHTML = newTbody.innerHTML;
-      applyFilter();
-    }}
-    
-    const statusEl = document.querySelector('.topbar-status');
-    if (statusEl) {{
-      const now = new Date().toLocaleTimeString([], {{ hour: '2-digit', minute: '2-digit', second: '2-digit' }});
-      statusEl.innerHTML = '<span class="dot-live"></span> Live sync active · ' + now;
-    }}
-  }} catch (e) {{
-    // network retry on next tick
-  }}
-}}
-setInterval(autoSync, 3500);
-</script>''', body_class="admin-body")
+</div>''', body_class="admin-body", script="admin.js")
 
 
 def email_html(product_name, sku, product, shop_url=""):

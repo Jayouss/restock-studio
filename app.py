@@ -471,11 +471,12 @@ class Handler(BaseHTTPRequestHandler):
             stats, retrying, rows = self.ctx.store.dashboard(status)
             return self.respond(200, ui.admin_page(stats, retrying, rows, status))
         allowed = {"/static/style.css": ("text/css; charset=utf-8", "style.css"),
-                   "/static/embed.js": ("application/javascript; charset=utf-8", "embed.js")}
+                   "/static/embed.js": ("application/javascript; charset=utf-8", "embed.js"),
+                   "/static/admin.js": ("application/javascript; charset=utf-8", "admin.js")}
         if path in allowed:
             media_type, filename = allowed[path]
             return self.respond(200, (ROOT / "static" / filename).read_bytes(), media_type,
-                                headers={"Cache-Control": "public, max-age=3600"})
+                                headers={"Cache-Control": "no-cache, must-revalidate"})
         return self.json(404, {"error": "Not found"})
 
     def do_POST(self):
