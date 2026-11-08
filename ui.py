@@ -6,6 +6,26 @@ pure achromatic chrome with data-only signals.
 """
 from __future__ import annotations
 import html
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+NY_TZ = ZoneInfo("America/New_York")
+
+
+def fmt_ny_time(iso_str):
+    if not iso_str:
+        return "—"
+    try:
+        clean = str(iso_str).strip()
+        if clean.endswith('Z'):
+            clean = clean[:-1] + '+00:00'
+        dt = datetime.fromisoformat(clean)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        ny_dt = dt.astimezone(NY_TZ)
+        return ny_dt.strftime("%Y-%m-%d %H:%M %Z")
+    except Exception:
+        return str(iso_str)[:16].replace('T', ' ')
 
 
 def h(value):
@@ -13,11 +33,11 @@ def h(value):
 
 
 def layout(title, main, *, body_class="", script=""):
-    script_tag = f'<script src="/static/{script}?v=6" defer></script>' if script else ""
+    script_tag = f'<script src="/static/{script}?v=7" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
-<link rel="stylesheet" href="/static/style.css?v=6">{script_tag}</head>
+<link rel="stylesheet" href="/static/style.css?v=7">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
 
@@ -238,15 +258,17 @@ def admin_page(stats, retrying, rows, status):
                     f'href="/admin?status={val}">{label}</a>' for val, label in filters)
 
     rows_html = ''.join(f'''<tr class="table-row">
-  <td><div class="email-val">{h(r['email'])}</div><div class="mobile-time">{h(r['created_at'][:16].replace('T', ' '))}</div></td>
+  <td><div class="email-val">{h(r['email'])}</div><div class="mobile-time">{h(fmt_ny_time(r['created_at']))}</div></td>
   <td><span class="sku-tag">{h(r['sku'])}</span></td>
   <td><span class="status-badge {h(r['status'])}">{h(r['status'])}</span></td>
-  <td class="hide-mobile">{h(r['created_at'][:16].replace('T', ' '))}</td>
-  <td class="hide-mobile">{h(r['notified_at'][:16].replace('T', ' ')) if r['notified_at'] else '—'}</td>
+  <td class="hide-mobile">{h(fmt_ny_time(r['created_at']))}</td>
+  <td class="hide-mobile">{h(fmt_ny_time(r['notified_at']))}</td>
 </tr>''' for r in rows)
 
     if not rows_html:
         rows_html = '<tr><td colspan="5" class="empty-row">No records found matching this filter.</td></tr>'
+
+    ny_now_str = datetime.now(NY_TZ).strftime("%I:%M:%S %p %Z")
 
     return layout("Operations Dashboard", f'''
 <div class="admin-shell">
@@ -288,7 +310,7 @@ def admin_page(stats, retrying, rows, status):
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
           <span id="sound-label">Audio alert on</span>
         </button>
-        <div class="topbar-status"><span class="dot-live"></span> Reconciliation Worker Active</div>
+        <div class="topbar-status"><span class="dot-live"></span> Live sync active · {ny_now_str}</div>
       </div>
     </header>
     
@@ -320,8 +342,8 @@ def admin_page(stats, retrying, rows, status):
                 <th>Customer email</th>
                 <th>Product SKU</th>
                 <th>Alert status</th>
-                <th class="hide-mobile">Requested at</th>
-                <th class="hide-mobile">Notified at</th>
+                <th class="hide-mobile">Requested at (EST)</th>
+                <th class="hide-mobile">Notified at (EST)</th>
               </tr>
             </thead>
             <tbody id="table-body">

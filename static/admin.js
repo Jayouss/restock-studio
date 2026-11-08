@@ -20,6 +20,25 @@
   }
   updateSoundUI();
 
+  function formatNYTime() {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    }).format(new Date());
+  }
+
+  const statusEl = document.querySelector('.topbar-status');
+  function updateLiveStatus() {
+    if (statusEl) {
+      statusEl.innerHTML = '<span class="dot-live"></span> Live sync active · ' + formatNYTime();
+    }
+  }
+  updateLiveStatus();
+
   function getAudioContext() {
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -180,12 +199,8 @@
         }
       }
 
-      // Update live status pulse in topbar
-      const statusEl = document.querySelector('.topbar-status');
-      if (statusEl) {
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        statusEl.innerHTML = '<span class="dot-live"></span> Live sync active · ' + now;
-      }
+      // Update live status pulse in topbar (New York / EST)
+      updateLiveStatus();
     } catch (e) {
       // Network retry on next tick
     }
