@@ -1027,6 +1027,117 @@ h1, h2, h3, p {
   color: var(--pill-positive-ink);
 }
 
+.status-badge.cancelled {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  color: var(--faint);
+}
+
+.content-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.btn-inspect {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-inspect:hover {
+  background: var(--raised);
+  border-color: var(--border-strong);
+}
+
+.details-row td {
+  background: var(--raised);
+  padding: 0 !important;
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-box {
+  padding: 16px 20px;
+}
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.inspector-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inspector-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.inspector-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.inspector-val {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.inspector-val.code-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  padding: 6px 10px;
+  margin-top: 2px;
+  display: block;
+  word-break: break-all;
+}
+
+.inspector-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-cancel-alert {
+  font-size: 11px;
+  font-weight: 500;
+  color: #b42318;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-cancel-alert:hover {
+  background: #fef3f2;
+  border-color: #fecdca;
+}
+
 .mobile-time {
   display: none;
 }

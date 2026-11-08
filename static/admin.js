@@ -2,9 +2,13 @@
   const input = document.getElementById('filter-input');
   const soundBtn = document.getElementById('sound-toggle');
   const soundLabel = document.getElementById('sound-label');
+  const exportBtn = document.getElementById('btn-export-csv');
+  const tabLinks = document.querySelectorAll('.tab-item');
+  const tbody = document.getElementById('table-body');
 
   let audioCtx = null;
   let soundEnabled = localStorage.getItem('restock_sound_enabled') !== 'false';
+  let currentTabStatus = new URLSearchParams(window.location.search).get('status') || 'all';
 
   function updateSoundUI() {
     if (!soundBtn || !soundLabel) return;
@@ -52,7 +56,7 @@
     return audioCtx;
   }
 
-  // Unlock audio on first user click or key anywhere on page
+  // Unlock audio on first user gesture anywhere
   const unlockAudio = () => {
     getAudioContext();
     document.removeEventListener('click', unlockAudio);
@@ -110,17 +114,128 @@
   }
 
   function applyFilter() {
-    if (!input) return;
-    const q = input.value.trim().toLowerCase();
+    const q = input ? input.value.trim().toLowerCase() : '';
     const rows = document.querySelectorAll('#table-body .table-row');
     rows.forEach(row => {
+      const rowStatus = row.getAttribute('data-status') || '';
       const text = row.textContent.toLowerCase();
-      row.style.display = text.indexOf(q) !== -1 ? '' : 'none';
+      const matchesTab = (currentTabStatus === 'all' || rowStatus === currentTabStatus);
+      const matchesSearch = !q || text.indexOf(q) !== -1;
+      
+      if (matchesTab && matchesSearch) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+        const inspectBtn = row.querySelector('.btn-inspect');
+        const detailsId = inspectBtn?.getAttribute('data-target');
+        if (detailsId) {
+          const detailsRow = document.getElementById(detailsId);
+          if (detailsRow) {
+            detailsRow.hidden = true;
+            if (inspectBtn) inspectBtn.textContent = 'Details ▾';
+          }
+        }
+      }
     });
   }
 
   if (input) {
     input.addEventListener('input', applyFilter);
+  }
+
+  function applyTab(status, pushState = true) {
+    currentTabStatus = status;
+    tabLinks.forEach(t => {
+      const href = t.getAttribute('href') || '';
+      const s = new URLSearchParams(href.split('?')[1] || '').get('status') || 'all';
+      if (s === status) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+    if (exportBtn) {
+      exportBtn.setAttribute('href', `/admin/export.csv?status=${encodeURIComponent(status)}`);
+    }
+    if (pushState) {
+      history.pushState(null, '', `/admin?status=${encodeURIComponent(status)}`);
+    }
+    applyFilter();
+  }
+
+  tabLinks.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = tab.getAttribute('href') || '';
+      const s = new URLSearchParams(href.split('?')[1] || '').get('status') || 'all';
+      applyTab(s, true);
+    });
+  });
+
+  window.addEventListener('popstate', () => {
+    const s = new URLSearchParams(window.location.search).get('status') || 'all';
+    applyTab(s, false);
+  });
+
+  // Delegate Row Inspector and Cancel Actions
+  if (tbody) {
+    tbody.addEventListener('click', async (e) => {
+      // Toggle Inspector
+      const inspectBtn = e.target.closest('.btn-inspect');
+      if (inspectBtn) {
+        const targetId = inspectBtn.getAttribute('data-target');
+        const targetRow = document.getElementById(targetId);
+        if (targetRow) {
+          targetRow.hidden = !targetRow.hidden;
+          inspectBtn.textContent = targetRow.hidden ? 'Details ▾' : 'Hide ▴';
+        }
+        return;
+      }
+
+      // Cancel Alert Action
+      const cancelBtn = e.target.closest('.btn-cancel-alert');
+      if (cancelBtn) {
+        const reqId = cancelBtn.getAttribute('data-id');
+        if (!reqId) return;
+        if (!confirm('Cancel this back-in-stock alert subscription?')) return;
+        cancelBtn.disabled = true;
+        cancelBtn.textContent = 'Cancelling…';
+        try {
+          const res = await fetch('/admin/requests/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: Number(reqId) })
+          });
+          const data = await res.json();
+          if (res.ok && data.ok) {
+            const mainRow = document.querySelector(`.table-row[data-id="${reqId}"]`);
+            if (mainRow) {
+              mainRow.setAttribute('data-status', 'cancelled');
+              const badge = mainRow.querySelector('.status-badge');
+              if (badge) {
+                badge.className = 'status-badge cancelled';
+                badge.textContent = 'Cancelled';
+              }
+            }
+            const detailsRow = document.getElementById(`details-${reqId}`);
+            if (detailsRow) {
+              const stageVal = detailsRow.querySelector('.inspector-item:nth-child(4) .inspector-val');
+              if (stageVal) stageVal.textContent = 'Alert Cancelled';
+              cancelBtn.remove();
+            }
+            applyFilter();
+          } else {
+            alert(data.error || 'Could not cancel alert.');
+            cancelBtn.disabled = false;
+            cancelBtn.textContent = 'Cancel and remove from waitlist';
+          }
+        } catch (err) {
+          alert('Network error. Could not cancel alert.');
+          cancelBtn.disabled = false;
+          cancelBtn.textContent = 'Cancel and remove from waitlist';
+        }
+      }
+    });
   }
 
   function getRowSignature(row) {
@@ -143,7 +258,7 @@
   let lastTotalCount = getTotalSubscriptions();
 
   async function autoSync() {
-    // If user is actively typing in the search box, do not interrupt
+    // If user is actively typing in search, do not interrupt
     if (input && document.activeElement === input && input.value.trim().length > 0) {
       return;
     }
@@ -189,17 +304,32 @@
         oldMetrics.innerHTML = newMetrics.innerHTML;
       }
 
+      // Record which details rows were open
+      const openDetailIds = new Set(
+        Array.from(document.querySelectorAll('.details-row:not([hidden])')).map(r => r.id)
+      );
+
       // Update table body
       const newTbody = doc.getElementById('table-body');
       const oldTbody = document.getElementById('table-body');
       if (newTbody && oldTbody) {
         if (oldTbody.innerHTML !== newTbody.innerHTML) {
           oldTbody.innerHTML = newTbody.innerHTML;
+          // Restore open details
+          openDetailIds.forEach(id => {
+            const restored = document.getElementById(id);
+            if (restored) {
+              restored.hidden = false;
+              const parentRow = restored.previousElementSibling;
+              const btn = parentRow?.querySelector('.btn-inspect');
+              if (btn) btn.textContent = 'Hide ▴';
+            }
+          });
           applyFilter();
         }
       }
 
-      // Update live status pulse in topbar (New York / EST)
+      // Update live status pulse in topbar
       updateLiveStatus();
     } catch (e) {
       // Network retry on next tick
@@ -215,4 +345,7 @@
       autoSync();
     }
   });
+
+  // Initial tab filter setup
+  applyTab(currentTabStatus, false);
 })();

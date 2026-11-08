@@ -245,6 +245,10 @@ class Store:
                                     "ORDER BY r.id DESC LIMIT 150").fetchall()
             return stats, retrying, [dict(r) for r in rows]
 
+    def cancel_request(self, req_id):
+        with self.db() as conn:
+            return conn.execute("UPDATE requests SET status='cancelled' WHERE id=? AND status='open'", (req_id,)).rowcount > 0
+
 
 def fetch_json(url, *, method="GET", key="", body=None, idem_key=None):
     payload = json.dumps(body).encode() if body is not None else None
@@ -470,6 +474,17 @@ class Handler(BaseHTTPRequestHandler):
             status = filters.get('status', ['all'])[0]
             stats, retrying, rows = self.ctx.store.dashboard(status)
             return self.respond(200, ui.admin_page(stats, retrying, rows, status))
+        if path == "/admin/export.csv":
+            if not self.auth_ok():
+                return self.respond(303, "", headers={"Location": "/admin/login"})
+            filters = parse_qs(url.query)
+            status = filters.get('status', ['all'])[0]
+            _, _, rows = self.ctx.store.dashboard(status)
+            today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+            csv_text = self.generate_csv(rows)
+            return self.respond(200, csv_text.encode('utf-8'), "text/csv; charset=utf-8",
+                                headers={"Content-Disposition": f'attachment; filename="restock-waitlist-{today_str}.csv"',
+                                         "Cache-Control": "no-cache"})
         allowed = {"/static/style.css": ("text/css; charset=utf-8", "style.css"),
                    "/static/embed.js": ("application/javascript; charset=utf-8", "embed.js"),
                    "/static/admin.js": ("application/javascript; charset=utf-8", "admin.js")}
@@ -527,7 +542,41 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/admin/logout":
             return self.respond(303, "", headers={"Location": "/admin/login", "Set-Cookie":
                                   "restock_admin=; HttpOnly; SameSite=Lax; Path=/admin; Max-Age=0"})
+        if path == "/admin/requests/cancel":
+            if not self.auth_ok():
+                return self.json(401, {"error": "Unauthorized"})
+            try:
+                data = self.parse_json()
+            except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+                return self.json(400, {"error": "Invalid JSON"})
+            req_id = data.get('id')
+            if not req_id:
+                return self.json(422, {"error": "Missing request ID"})
+            try:
+                cancelled = self.ctx.store.cancel_request(int(req_id))
+            except (ValueError, TypeError):
+                return self.json(422, {"error": "Invalid request ID"})
+            return self.json(200 if cancelled else 404, {"ok": cancelled})
         return self.json(404, {"error": "Not found"})
+
+    def generate_csv(self, rows):
+        import csv
+        import io
+        out = io.StringIO()
+        writer = csv.writer(out)
+        writer.writerow(["ID", "Customer Email", "Product SKU", "Status", "Requested At (EST)", "Notified At (EST)", "Attempts", "Last Error"])
+        for r in rows:
+            writer.writerow([
+                r.get('id', ''),
+                r.get('email', ''),
+                r.get('sku', ''),
+                r.get('status', ''),
+                ui.fmt_ny_time(r.get('created_at')),
+                ui.fmt_ny_time(r.get('notified_at')),
+                r.get('attempts', 0) or 0,
+                r.get('last_error', '') or ''
+            ])
+        return out.getvalue()
 
 
 class Context:

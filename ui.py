@@ -33,11 +33,11 @@ def h(value):
 
 
 def layout(title, main, *, body_class="", script=""):
-    script_tag = f'<script src="/static/{script}?v=7" defer></script>' if script else ""
+    script_tag = f'<script src="/static/{script}?v=8" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
-<link rel="stylesheet" href="/static/style.css?v=7">{script_tag}</head>
+<link rel="stylesheet" href="/static/style.css?v=8">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
 
@@ -257,16 +257,48 @@ def admin_page(stats, retrying, rows, status):
     pills = ''.join(f'<a class="tab-item {"active" if val == status else ""}" '
                     f'href="/admin?status={val}">{label}</a>' for val, label in filters)
 
-    rows_html = ''.join(f'''<tr class="table-row">
+    rows_html = ''.join(f'''<tr class="table-row" data-id="{r['id']}" data-status="{r['status']}">
   <td><div class="email-val">{h(r['email'])}</div><div class="mobile-time">{h(fmt_ny_time(r['created_at']))}</div></td>
   <td><span class="sku-tag">{h(r['sku'])}</span></td>
   <td><span class="status-badge {h(r['status'])}">{h(r['status'])}</span></td>
   <td class="hide-mobile">{h(fmt_ny_time(r['created_at']))}</td>
   <td class="hide-mobile">{h(fmt_ny_time(r['notified_at']))}</td>
+  <td class="text-right">
+    <button type="button" class="btn-inspect" data-target="details-{r['id']}" title="Inspect delivery diagnostics">Details ▾</button>
+  </td>
+</tr>
+<tr class="details-row" id="details-{r['id']}" hidden>
+  <td colspan="6">
+    <div class="inspector-box">
+      <div class="inspector-grid">
+        <div class="inspector-item">
+          <span class="inspector-label">Internal Request ID</span>
+          <span class="inspector-val">#{r['id']}</span>
+        </div>
+        <div class="inspector-item">
+          <span class="inspector-label">Outbox Delivery Attempts</span>
+          <span class="inspector-val">{r.get('attempts', 0) or 0} of 5</span>
+        </div>
+        <div class="inspector-item">
+          <span class="inspector-label">Provider Message Reference</span>
+          <span class="inspector-val">{h(r.get('provider_id') or 'Pending In-Stock')}</span>
+        </div>
+        <div class="inspector-item">
+          <span class="inspector-label">Execution Stage</span>
+          <span class="inspector-val">{'Dispatched via Resend' if r['status'] == 'notified' else ('Queued for Transmission' if r['status'] == 'queued' else ('Alert Cancelled' if r['status'] == 'cancelled' else 'Awaiting Stock Verification'))}</span>
+        </div>
+        <div class="inspector-item full-width">
+          <span class="inspector-label">Outbox Diagnostic Trace / Error Log</span>
+          <span class="inspector-val code-val">{h(r.get('last_error') or 'Zero errors recorded. Pipeline operating normally.')}</span>
+        </div>
+      </div>
+      { f'<div class="inspector-footer"><button type="button" class="btn-cancel-alert" data-id="{r["id"]}">Cancel and remove from waitlist</button></div>' if r['status'] == 'open' else '' }
+    </div>
+  </td>
 </tr>''' for r in rows)
 
     if not rows_html:
-        rows_html = '<tr><td colspan="5" class="empty-row">No records found matching this filter.</td></tr>'
+        rows_html = '<tr><td colspan="6" class="empty-row">No records found matching this filter.</td></tr>'
 
     ny_now_str = datetime.now(NY_TZ).strftime("%I:%M:%S %p %Z")
 
@@ -320,7 +352,13 @@ def admin_page(stats, retrying, rows, status):
           <h1>Activity & Subscriptions</h1>
           <p>Real-time customer alert registry, authoritative inventory verification status, and transactional email outbox jobs.</p>
         </div>
-        <a class="secondary-button" href="/admin">Refresh Activity</a>
+        <div class="content-actions">
+          <a class="secondary-button" href="/admin/export.csv" id="btn-export-csv" download title="Export subscriptions to CSV">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export CSV</span>
+          </a>
+          <a class="secondary-button" href="/admin">Refresh Activity</a>
+        </div>
       </div>
       
       <div class="metrics-grid">
@@ -344,6 +382,7 @@ def admin_page(stats, retrying, rows, status):
                 <th>Alert status</th>
                 <th class="hide-mobile">Requested at (EST)</th>
                 <th class="hide-mobile">Notified at (EST)</th>
+                <th class="text-right">Diagnostics</th>
               </tr>
             </thead>
             <tbody id="table-body">
