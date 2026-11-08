@@ -65,4 +65,29 @@
     const s = document.querySelector('#sku');
     if (s) s.focus();
   });
+
+  // CSP-safe catalog selection
+  const catalogButtons = document.querySelectorAll('.catalog-item');
+  catalogButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetSku = btn.getAttribute('data-sku');
+      if (skuInput && targetSku) {
+        skuInput.value = targetSku;
+        catalogButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (error) error.hidden = true;
+      }
+    });
+  });
+
+  skuInput?.addEventListener('input', () => {
+    const val = skuInput.value.trim().toUpperCase();
+    catalogButtons.forEach(btn => {
+      if (btn.getAttribute('data-sku') === val) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  });
 })();

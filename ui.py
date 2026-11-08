@@ -113,6 +113,18 @@ def home_page():
 
 def embed_page(sku):
     sku = h(sku or "TEE-ORG-WHT-M")
+    sample_items = [
+        ("TEE-ORG-WHT-M", "Organic T-Shirt", "White · Medium"),
+        ("NB-DOT-A5", "Dot Grid Notebook", "A5 · 192 Pages"),
+        ("PLNT-MON-M", "Monstera Plant", "Ceramic Pot · Medium"),
+        ("KNF-CHF-20", "Chef's Knife", "20 cm Steel Blade"),
+    ]
+    catalog_items_html = "".join(f'''<button type="button" class="catalog-item {'active' if sku == item_sku else ''}" data-sku="{item_sku}">
+  <span class="catalog-title">{item_title}</span>
+  <span class="catalog-meta">{item_meta}</span>
+  <span class="catalog-sku">{item_sku}</span>
+</button>''' for item_sku, item_title, item_meta in sample_items)
+
     return layout("Notify Me When In Stock", f'''
 <main class="embed-shell">
   <div class="embed-card">
@@ -133,12 +145,8 @@ def embed_page(sku):
         <div class="field-group">
           <label for="sku">Product SKU</label>
           <input id="sku" name="sku" placeholder="e.g. TEE-ORG-WHT-M" maxlength="64" required value="{sku}" autocomplete="off" spellcheck="false">
-          <div class="sku-suggestions">
-            <span class="sku-hint">Quick select:</span>
-            <button type="button" class="sku-pill" onclick="document.getElementById('sku').value='TEE-ORG-WHT-M'">TEE-ORG-WHT-M</button>
-            <button type="button" class="sku-pill" onclick="document.getElementById('sku').value='NB-DOT-A5'">NB-DOT-A5</button>
-            <button type="button" class="sku-pill" onclick="document.getElementById('sku').value='PLNT-MON-M'">PLNT-MON-M</button>
-            <button type="button" class="sku-pill" onclick="document.getElementById('sku').value='KNF-CHF-20'">KNF-CHF-20</button>
+          <div class="catalog-grid" role="group" aria-label="Select catalog item">
+            {catalog_items_html}
           </div>
         </div>
         
