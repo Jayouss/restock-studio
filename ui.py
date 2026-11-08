@@ -13,11 +13,11 @@ def h(value):
 
 
 def layout(title, main, *, body_class="", script=""):
-    script_tag = f'<script src="/static/{script}?v=5" defer></script>' if script else ""
+    script_tag = f'<script src="/static/{script}?v=6" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
-<link rel="stylesheet" href="/static/style.css?v=5">{script_tag}</head>
+<link rel="stylesheet" href="/static/style.css?v=6">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
 
@@ -283,7 +283,13 @@ def admin_page(stats, retrying, rows, status):
   <main class="admin-main">
     <header class="admin-topbar">
       <div class="topbar-title">Operations Console / Alert Orchestration</div>
-      <div class="topbar-status"><span class="dot-live"></span> Reconciliation Worker Active</div>
+      <div class="topbar-actions">
+        <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true" title="Toggle audio alert on new subscription">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+          <span id="sound-label">Audio alert on</span>
+        </button>
+        <div class="topbar-status"><span class="dot-live"></span> Reconciliation Worker Active</div>
+      </div>
     </header>
     
     <div class="admin-content">

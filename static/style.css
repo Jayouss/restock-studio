@@ -796,6 +796,56 @@ h1, h2, h3, p {
   color: var(--chart-hue);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 4px 10px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sound-toggle:hover {
+  background: var(--raised);
+  border-color: var(--border-strong);
+}
+
+.sound-toggle.muted {
+  color: var(--faint);
+  background: transparent;
+  opacity: 0.75;
+}
+
+.sound-toggle svg {
+  flex-shrink: 0;
+}
+
+@keyframes row-pulse {
+  0% {
+    background-color: var(--raised);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.table-row.row-highlight {
+  animation: row-pulse 2.5s ease-out;
+}
+
 .admin-content {
   padding: 28px;
   max-width: 1200px;
