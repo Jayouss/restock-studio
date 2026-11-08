@@ -314,16 +314,53 @@ def admin_page(stats, retrying, rows, status):
 </div>
 <script>
 const input = document.getElementById('filter-input');
-if (input) {{
-  input.addEventListener('input', () => {{
-    const q = input.value.trim().toLowerCase();
-    const rows = document.querySelectorAll('#table-body .table-row');
-    rows.forEach(row => {{
-      const text = row.textContent.toLowerCase();
-      row.style.display = text.indexOf(q) !== -1 ? '' : 'none';
-    }});
+function applyFilter() {{
+  if (!input) return;
+  const q = input.value.trim().toLowerCase();
+  const rows = document.querySelectorAll('#table-body .table-row');
+  rows.forEach(row => {{
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.indexOf(q) !== -1 ? '' : 'none';
   }});
 }}
+if (input) {{
+  input.addEventListener('input', applyFilter);
+}}
+
+// Live background auto-refresh
+async function autoSync() {{
+  if (input && document.activeElement === input && input.value.trim().length > 0) {{
+    return;
+  }}
+  try {{
+    const res = await fetch(window.location.href, {{ headers: {{ 'Cache-Control': 'no-cache' }} }});
+    if (!res.ok) return;
+    const text = await res.text();
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    
+    const newMetrics = doc.querySelector('.metrics-grid');
+    const oldMetrics = document.querySelector('.metrics-grid');
+    if (newMetrics && oldMetrics) {{
+      oldMetrics.innerHTML = newMetrics.innerHTML;
+    }}
+    
+    const newTbody = doc.getElementById('table-body');
+    const oldTbody = document.getElementById('table-body');
+    if (newTbody && oldTbody) {{
+      oldTbody.innerHTML = newTbody.innerHTML;
+      applyFilter();
+    }}
+    
+    const statusEl = document.querySelector('.topbar-status');
+    if (statusEl) {{
+      const now = new Date().toLocaleTimeString([], {{ hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+      statusEl.innerHTML = '<span class="dot-live"></span> Live sync active · ' + now;
+    }}
+  }} catch (e) {{
+    // network retry on next tick
+  }}
+}}
+setInterval(autoSync, 3500);
 </script>''', body_class="admin-body")
 
 
