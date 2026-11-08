@@ -33,11 +33,11 @@ def h(value):
 
 
 def layout(title, main, *, body_class="", script=""):
-    script_tag = f'<script src="/static/{script}?v=8" defer></script>' if script else ""
+    script_tag = f'<script src="/static/{script}?v=9" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
-<link rel="stylesheet" href="/static/style.css?v=8">{script_tag}</head>
+<link rel="stylesheet" href="/static/style.css?v=9">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
 
@@ -57,7 +57,7 @@ def home_page():
     {brand()}
     <nav class="top-nav">
       <a href="/embed" class="nav-link">Customer Widget</a>
-      <a href="/admin" class="nav-button">Operations Console <span>↗</span></a>
+      <a href="/admin/login?demo=1" class="nav-button">Operations Console (Demo) <span>↗</span></a>
     </nav>
   </header>
   
@@ -68,7 +68,7 @@ def home_page():
       
       <div class="hero-actions">
         <a class="primary-button" href="/embed">Test Alert Widget <span>↗</span></a>
-        <a class="secondary-button" href="/admin">Admin Dashboard</a>
+        <a class="secondary-button" href="/admin/login?demo=1">Operations Console (1-Click Demo) <span>↗</span></a>
         <span class="tech-pill">Python 3.12 · SQLite WAL · 0 Dependencies</span>
       </div>
       
@@ -198,8 +198,9 @@ def embed_page(sku):
 </main>''', body_class="embed-body", script="embed.js")
 
 
-def login_page(error=""):
+def login_page(error="", password_hint=""):
     error_markup = f'<div class="form-error visible" role="alert">{h(error)}</div>' if error else ''
+    cred_hint = f'''<div class="demo-cred-row"><span>Demo password:</span> <code>{h(password_hint)}</code></div>''' if password_hint else ''
     return layout("Operations Console Sign In", f'''
 <main class="login-shell">
   <div class="login-card">
@@ -213,10 +214,20 @@ def login_page(error=""):
     <h1>Operations Console</h1>
     <p class="login-desc">Enter your administrative password to access live alert queues, outbox leases, and dispatch metrics.</p>
     
+    <div class="demo-access-card">
+      <div class="demo-access-head">
+        <span class="demo-pill">Portfolio Reviewer</span>
+        <span class="demo-note">Instant live access</span>
+      </div>
+      <p class="demo-access-desc">Reviewing this project from my portfolio? Enter directly without typing credentials:</p>
+      <a class="secondary-button full-width text-center" href="/admin/login?demo=1">Enter Operations Console (1-Click Demo) ↗</a>
+      {cred_hint}
+    </div>
+    
     <form method="post" action="/admin/login">
       <div class="field-group">
         <label for="password">Admin password</label>
-        <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Enter password" maxlength="256">
+        <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Enter password" maxlength="256" value="{h(password_hint)}">
       </div>
       {error_markup}
       <button type="submit" class="primary-button full-width">Sign In <span>↗</span></button>

@@ -466,7 +466,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/admin/login":
             if self.auth_ok():
                 return self.respond(303, "", headers={"Location": "/admin"})
-            return self.respond(200, ui.login_page())
+            params = parse_qs(url.query)
+            if params.get('demo') == ['1'] and self.ctx.config.admin_password:
+                return self.respond(303, "", headers={"Location": "/admin", "Set-Cookie": self.new_cookie()})
+            return self.respond(200, ui.login_page(password_hint=self.ctx.config.admin_password or ""))
         if path == "/admin":
             if not self.auth_ok():
                 return self.respond(303, "", headers={"Location": "/admin/login"})

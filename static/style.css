@@ -640,6 +640,70 @@ h1, h2, h3, p {
   margin: 0 0 24px;
 }
 
+.demo-access-card {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.demo-access-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.demo-pill {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+.demo-note {
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.demo-access-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+.demo-cred-row {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-cred-row code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 2px 6px;
+  border-radius: var(--radius-control);
+  user-select: all;
+}
+
+.text-center {
+  text-align: center;
+  justify-content: center;
+}
+
 .login-footer {
   margin-top: 24px;
   text-align: center;
