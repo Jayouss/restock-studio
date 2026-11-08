@@ -1,0 +1,20 @@
+services:
+  restock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: restock-studio:latest
+    container_name: restock-studio
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:' + __import__('os').environ.get('PORT','8000') + '/healthz', timeout=2)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
