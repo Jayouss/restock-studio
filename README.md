@@ -8,11 +8,11 @@ A production-grade, highly resilient back-in-stock notification system, embeddab
 
 ## Live Production Deployment
 
-- **Live Service URL:** [https://algovia.duckdns.org](https://algovia.duckdns.org)
-- **Configured Domain:** [https://restock.jayous-research.web.id](https://restock.jayous-research.web.id)
-- **Embeddable Widget:** [https://algovia.duckdns.org/embed](https://algovia.duckdns.org/embed)
-- **Admin Dashboard:** [https://algovia.duckdns.org/admin](https://algovia.duckdns.org/admin)
-- **Health Check:** [https://algovia.duckdns.org/healthz](https://algovia.duckdns.org/healthz)
+- **Live Production URL:** [https://restock.jayous-research.web.id](https://restock.jayous-research.web.id)
+- **Customer Embed Widget:** [https://restock.jayous-research.web.id/embed](https://restock.jayous-research.web.id/embed)
+- **Admin Dashboard:** [https://restock.jayous-research.web.id/admin](https://restock.jayous-research.web.id/admin)
+- **Health Check Probe:** [https://restock.jayous-research.web.id/healthz](https://restock.jayous-research.web.id/healthz)
+- **Direct VPS Failover URL:** [https://algovia.duckdns.org](https://algovia.duckdns.org)
 
 ---
 
