@@ -396,7 +396,8 @@ class Handler(BaseHTTPRequestHandler):
         for key, value in (headers or {}).items():
             self.send_header(key, value)
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != "HEAD":
+            self.wfile.write(body)
 
     def json(self, status, payload):
         self.respond(status, json.dumps(payload, ensure_ascii=False), "application/json; charset=utf-8")
@@ -443,6 +444,9 @@ class Handler(BaseHTTPRequestHandler):
                              f"restock_admin:{expires}".encode(), hashlib.sha256).hexdigest()
         secure = "; Secure" if self.headers.get("X-Forwarded-Proto", "") == "https" else ""
         return f"restock_admin={expires}.{signature}; HttpOnly; SameSite=Lax; Path=/admin; Max-Age=43200{secure}"
+
+    def do_HEAD(self):
+        self.do_GET()
 
     def do_GET(self):
         url = urlsplit(self.path)

@@ -145,6 +145,12 @@ class RestockIntegrationTest(unittest.TestCase):
                            {"event_id": event_id, "sku": sku, "quantity": quantity}, secret=secret)
 
     def test_endpoints_and_admin_protection(self):
+        status, body, headers = api_request(self.origin+'/healthz', method='HEAD')
+        self.assertEqual(status, 200)
+        self.assertEqual(body, '')
+        status, body, _ = api_request(self.origin+'/healthz')
+        self.assertEqual(status, 200)
+        self.assertEqual(body, 'ok')
         status, body, _ = api_request(self.origin+'/embed?sku=ITEM-A')
         self.assertEqual(status, 200)
         self.assertIn('name="sku"', body)

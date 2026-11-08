@@ -1,5 +1,6 @@
 .env
-.env.local
+.env*
+scratch_*
 __pycache__/
 *.py[cod]
 data/
