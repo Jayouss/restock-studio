@@ -1,7 +1,8 @@
 """Presentation templates and responsive transactional HTML email for Restock Studio.
-Design System: Enterprise Modern Obsidian & Vibrant Amber (Sisense-inspired).
+Design System: Achromatic Ledger (Distilled from taste-skill v2).
 Strictly adheres to anti-slop guidelines: no generic kickers, no gradient text,
-no unicode emojis in place of UI elements, no index numbering on cards.
+no unicode emojis in place of UI elements, no index numbering on cards,
+pure achromatic chrome with data-only signals.
 """
 from __future__ import annotations
 import html
@@ -15,7 +16,7 @@ def layout(title, main, *, body_class="", script=""):
     script_tag = f'<script src="/static/{script}" defer></script>' if script else ""
     return f'''<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090d16"><title>{h(title)} — Restock Studio</title>
+<meta name="theme-color" content="#f8f8f8"><title>{h(title)} — Restock Studio</title>
 <link rel="stylesheet" href="/static/style.css">{script_tag}</head>
 <body class="{h(body_class)}">{main}</body></html>'''
 
@@ -30,7 +31,7 @@ def brand():
 
 
 def home_page():
-    return layout("Enterprise Inventory Alert Tool", f'''
+    return layout("Inventory Alert Engine", f'''
 <div class="site-shell">
   <header class="topbar">
     {brand()}
@@ -65,25 +66,25 @@ def home_page():
     
     <section class="hero-visual" aria-label="Live System Telemetry">
       <div class="panel-header">
-        <div class="panel-title">SYSTEM TELEMETRY & DISPATCH</div>
-        <div class="status-indicator"><span class="status-dot-pulse"></span> ACTIVE</div>
+        <div class="panel-title">System telemetry & dispatch</div>
+        <div class="status-indicator"><span class="status-dot-pulse"></span> Active</div>
       </div>
       
       <div class="telemetry-metrics">
         <div class="telemetry-card">
-          <div class="telemetry-label">DEDUPLICATION RATE</div>
+          <div class="telemetry-label">Deduplication rate</div>
           <div class="telemetry-val">100%</div>
           <div class="telemetry-sub">ACID Partial Unique Index</div>
         </div>
         <div class="telemetry-card">
-          <div class="telemetry-label">INVENTORY SYNC</div>
+          <div class="telemetry-label">Inventory sync</div>
           <div class="telemetry-val">Authoritative</div>
           <div class="telemetry-sub">Phantom Restocks Blocked</div>
         </div>
       </div>
       
       <div class="feed-container">
-        <div class="feed-head">RECENT INVENTORY DISPATCH STREAM</div>
+        <div class="feed-head">Recent inventory dispatch stream</div>
         <div class="feed-row">
           <div class="feed-cell-sku">TEE-ORG-WHT-M</div>
           <div class="feed-cell-event">Restock Verified (qty: 8)</div>
@@ -104,8 +105,8 @@ def home_page():
   </main>
   
   <footer class="site-footer">
-    <div class="footer-left">RESTOCK STUDIO — PRODUCTION INVENTORY ENGINE</div>
-    <div class="footer-right">DEPLOYED ON AWS EC2 · TLS TERMINATED · SECURE SQLITE WAL</div>
+    <div class="footer-left">Restock Studio — Production Inventory Engine</div>
+    <div class="footer-right">Deployed on AWS EC2 · TLS Terminated · SQLite WAL</div>
   </footer>
 </div>''')
 
@@ -151,14 +152,14 @@ def embed_page(sku):
     
     <div id="success-panel" class="success-panel" hidden>
       <div class="success-badge">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
       <h2>Alert registered</h2>
       <p id="success-msg" class="embed-desc">We've locked in your request. You will receive an email as soon as this item is verified in stock.</p>
       <button class="secondary-button" id="new-alert" type="button">Track another product</button>
     </div>
   </div>
-  <div class="embed-credit">POWERED BY RESTOCK STUDIO INVENTORY ENGINE</div>
+  <div class="embed-credit">Restock Studio inventory notification engine</div>
 </main>''', body_class="embed-body", script="embed.js")
 
 
@@ -237,11 +238,11 @@ def admin_page(stats, retrying, rows, status):
   <aside class="admin-sidebar">
     <div class="sidebar-top">
       {brand()}
-      <div class="sidebar-tag">OPERATIONS</div>
+      <div class="sidebar-tag">Operations</div>
     </div>
     
     <nav class="sidebar-menu">
-      <div class="menu-label">CONSOLE NAVIGATION</div>
+      <div class="menu-label">Navigation</div>
       <a class="menu-link active" href="/admin">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Alert activity</span>
@@ -266,8 +267,8 @@ def admin_page(stats, retrying, rows, status):
   
   <main class="admin-main">
     <header class="admin-topbar">
-      <div class="topbar-title">OPERATIONS CONSOLE <span>/</span> ALERT ORCHESTRATION</div>
-      <div class="topbar-status"><span class="dot-live"></span> RECONCILIATION WORKER ACTIVE</div>
+      <div class="topbar-title">Operations Console / Alert Orchestration</div>
+      <div class="topbar-status"><span class="dot-live"></span> Reconciliation Worker Active</div>
     </header>
     
     <div class="admin-content">
@@ -295,11 +296,11 @@ def admin_page(stats, retrying, rows, status):
           <table class="data-table">
             <thead>
               <tr>
-                <th>CUSTOMER EMAIL</th>
-                <th>PRODUCT SKU</th>
-                <th>ALERT STATUS</th>
-                <th class="hide-mobile">REQUESTED AT</th>
-                <th class="hide-mobile">NOTIFIED AT</th>
+                <th>Customer email</th>
+                <th>Product SKU</th>
+                <th>Alert status</th>
+                <th class="hide-mobile">Requested at</th>
+                <th class="hide-mobile">Notified at</th>
               </tr>
             </thead>
             <tbody id="table-body">
@@ -331,49 +332,49 @@ def email_html(product_name, sku, product, shop_url=""):
     s = h(sku)
     price = product.get('price')
     currency = product.get('currency', 'GBP')
-    price_line = f'<div style="font-size:15px;color:#94a3b8;padding-top:6px">{h(currency)} {h(price)}</div>' if isinstance(price, (int, float)) else ''
+    price_line = f'<div style="font-size:15px;color:#6b6b6b;padding-top:6px">{h(currency)} {h(price)}</div>' if isinstance(price, (int, float)) else ''
     
     shop_link = ''
     if isinstance(shop_url, str) and shop_url.startswith(('https://', 'http://')):
-        shop_link = f'<tr><td align="center" style="padding:16px 36px 36px"><a href="{h(shop_url)}" style="display:block;background:#f5a623;color:#090d16;text-decoration:none;padding:16px 28px;border-radius:6px;font-size:15px;font-weight:700">View In Store &nbsp;↗</a></td></tr>'
+        shop_link = f'<tr><td align="center" style="padding:16px 36px 36px"><a href="{h(shop_url)}" style="display:block;background:#141414;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:6px;font-size:14px;font-weight:600">View In Store &nbsp;↗</a></td></tr>'
         
     return f'''<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>It's back in stock: {n}</title></head>
-<body style="margin:0;padding:0;background:#090d16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#f9fafb">
-<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#090d16">
+<body style="margin:0;padding:0;background:#f8f8f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0a0a0a">
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f8f8f8">
   <tr><td align="center" style="padding:36px 12px">
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px;background:#111622;border:1px solid #1e293b;border-radius:10px;overflow:hidden">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:540px;background:#ffffff;border:1px solid #e6e6e6;border-radius:8px;overflow:hidden">
       <tr>
-        <td style="padding:28px 36px 24px;border-bottom:1px solid #1e293b;font-size:20px;font-weight:800;color:#f9fafb">
-          <span style="color:#f5a623">↗</span> Restock Studio
+        <td style="padding:24px 32px 20px;border-bottom:1px solid #e6e6e6;font-size:18px;font-weight:700;color:#0a0a0a">
+          Restock Studio
         </td>
       </tr>
       <tr>
-        <td style="background:#151c2c;padding:36px 36px 32px;border-bottom:1px solid #1e293b">
-          <h1 style="font-size:32px;line-height:1.15;letter-spacing:-0.03em;margin:0 0 10px;color:#ffffff">Back in stock.</h1>
-          <div style="font-size:15px;line-height:1.6;color:#94a3b8">The item you were waiting for is officially available in inventory again.</div>
+        <td style="padding:32px 32px 24px;border-bottom:1px solid #e6e6e6">
+          <h1 style="font-size:26px;line-height:1.2;letter-spacing:-0.02em;margin:0 0 10px;color:#0a0a0a">Back in stock.</h1>
+          <div style="font-size:15px;line-height:1.6;color:#6b6b6b">The item you were waiting for is officially available in inventory again.</div>
         </td>
       </tr>
       <tr>
-        <td style="padding:32px 36px 20px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#64748b;text-transform:uppercase">ITEM DETAILS</div>
-          <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;line-height:1.3;margin-top:8px;color:#f9fafb">{n}</div>
-          <div style="font-size:13px;color:#94a3b8;padding-top:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">SKU: {s}</div>
+        <td style="padding:28px 32px 20px">
+          <div style="font-size:12px;font-weight:600;color:#6b6b6b">Item details</div>
+          <div style="font-size:18px;font-weight:700;line-height:1.3;margin-top:6px;color:#0a0a0a">{n}</div>
+          <div style="font-size:13px;color:#6b6b6b;padding-top:4px">SKU: {s}</div>
           {price_line}
         </td>
       </tr>
       <tr>
-        <td style="padding:0 36px 24px">
-          <div style="border-top:1px solid #1e293b;padding-top:20px;font-size:14px;line-height:1.6;color:#94a3b8">
+        <td style="padding:0 32px 24px">
+          <div style="border-top:1px solid #f0f0f0;padding-top:18px;font-size:13px;line-height:1.6;color:#6b6b6b">
             This item has limited inventory and may sell out quickly. You received this because you specifically requested a restock notification.
           </div>
         </td>
       </tr>
       {shop_link}
       <tr>
-        <td style="padding:24px 36px 32px;background:#090d16;font-size:12px;line-height:1.7;color:#64748b;border-top:1px solid #1e293b">
+        <td style="padding:20px 32px 28px;background:#f8f8f8;font-size:12px;line-height:1.6;color:#999999;border-top:1px solid #e6e6e6">
           You are receiving this single alert for SKU {s}. No newsletters, no marketing lists.<br>
-          <strong style="color:#94a3b8">Restock Studio Enterprise Alert Engine</strong>
+          <strong style="color:#6b6b6b">Restock Studio Inventory Engine</strong>
         </td>
       </tr>
     </table>
